@@ -1,6 +1,8 @@
 import tkinter as tk
 from abc import ABC, abstractmethod
 
+# chess piece emojis R': '♜', 'N': '♞', 'B': '♝', 'Q': '♛', 'K': '♚', 'P': '♟'
+
 # set color using bridge pattern
 # color API
 class Color(ABC):
@@ -29,27 +31,27 @@ class Piece:
 
 class Pawn(Piece):
     def __init__(self, color:Color, row, col):
-        super().__init__(color, "P", row, col)
+        super().__init__(color, "♙", row, col)
 
 class Rook(Piece):
     def __init__(self, color:Color, row, col):
-        super().__init__(color, "R", row, col)
+        super().__init__(color, "♖", row, col)
 
 class Knight(Piece):
     def __init__(self, color:Color, row, col):
-        super().__init__(color, "N", row, col)
+        super().__init__(color, "♘", row, col)
 
 class Bishop(Piece):
     def __init__(self, color:Color, row, col):
-        super().__init__(color, "B", row, col)
+        super().__init__(color, "♗", row, col)
 
 class Queen(Piece):
     def __init__(self, color:Color, row, col):
-        super().__init__(color, "Q", row, col)
+        super().__init__(color, "♕", row, col)
 
 class King(Piece):
     def __init__(self, color:Color, row, col):
-        super().__init__(color, "K", row, col)
+        super().__init__(color, "♔", row, col)
 
 class ChessGame:
     def __init__(self, master):
