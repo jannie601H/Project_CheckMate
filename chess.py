@@ -1,48 +1,8 @@
 import tkinter as tk
 from abc import ABC, abstractmethod
 
-class ChessPiece(ABC):
-    def __init__(self, color, row, col):
-        self.color = color
-        self.row = row
-        self.col = col
-
-    @abstractmethod
-    def get_symbol(self):
-        pass
-
-class Piece(ChessPiece):
-    def __init__(self, color, symbol, row, col):
-        super().__init__(color, row, col)
-        self.symbol = symbol
-
-    def get_symbol(self):
-        return self.symbol
-
-class Pawn(Piece):
-    def __init__(self, color, row, col):
-        super().__init__(color, "P", row, col)
-
-class Rook(Piece):
-    def __init__(self, color, row, col):
-        super().__init__(color, "R", row, col)
-
-class Knight(Piece):
-    def __init__(self, color, row, col):
-        super().__init__(color, "N", row, col)
-
-class Bishop(Piece):
-    def __init__(self, color, row, col):
-        super().__init__(color, "B", row, col)
-
-class Queen(Piece):
-    def __init__(self, color, row, col):
-        super().__init__(color, "Q", row, col)
-
-class King(Piece):
-    def __init__(self, color, row, col):
-        super().__init__(color, "K", row, col)
-
+# set color using bridge pattern
+# color API
 class Color(ABC):
     @abstractmethod
     def get_color(self):
@@ -55,6 +15,41 @@ class Black(Color):
 class White(Color):
     def get_color(self):
         return "white"
+
+# Piece API
+class Piece:
+    def __init__(self, color:Color, symbol, row, col):
+        self.color = color
+        self.row = row
+        self.col = col
+        self.symbol = symbol
+
+    def get_symbol(self):
+        return self.symbol
+
+class Pawn(Piece):
+    def __init__(self, color:Color, row, col):
+        super().__init__(color, "P", row, col)
+
+class Rook(Piece):
+    def __init__(self, color:Color, row, col):
+        super().__init__(color, "R", row, col)
+
+class Knight(Piece):
+    def __init__(self, color:Color, row, col):
+        super().__init__(color, "N", row, col)
+
+class Bishop(Piece):
+    def __init__(self, color:Color, row, col):
+        super().__init__(color, "B", row, col)
+
+class Queen(Piece):
+    def __init__(self, color:Color, row, col):
+        super().__init__(color, "Q", row, col)
+
+class King(Piece):
+    def __init__(self, color:Color, row, col):
+        super().__init__(color, "K", row, col)
 
 class ChessGame:
     def __init__(self, master):
