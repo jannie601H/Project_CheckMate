@@ -1,8 +1,6 @@
 import tkinter as tk
 from abc import ABC, abstractmethod
 
-# chess piece emojis R': '♜', 'N': '♞', 'B': '♝', 'Q': '♛', 'K': '♚', 'P': '♟'
-
 # set color using bridge pattern
 # color API
 class Color(ABC):
@@ -11,12 +9,18 @@ class Color(ABC):
         pass
 
 class Black(Color):
+    def __init__(self):
+        self.color = "black"
+
     def get_color(self):
-        return "black"
+        return self.color
 
 class White(Color):
+    def __init__(self):
+        self.color = "white"
+
     def get_color(self):
-        return "white"
+        return self.color
 
 # Piece API
 class Piece:
@@ -25,33 +29,221 @@ class Piece:
         self.row = row
         self.col = col
         self.symbol = symbol
+        self.movable = []
 
     def get_symbol(self):
         return self.symbol
+    
+    def get_color(self):
+        return self.color.get_color()
+    
+    def get_loc(self):
+        """return location (row, col)"""
+        return (self.row, self.col)
+    
+    def movable_loc(self):
+        """return movable location list"""
+        pass
+
+# chess piece emojis R': '♜', 'N': '♞', 'B': '♝', 'Q': '♛', 'K': '♚', 'P': '♟'
+
+def in_board(r, c): # check r, c in board
+    return r <= 7 and r >= 0 and c <= 7 and c >= 0
 
 class Pawn(Piece):
     def __init__(self, color:Color, row, col):
         super().__init__(color, "♙", row, col)
 
+    def movable_loc(self, board): # initial position pawn can move 2 step (needed)
+        r, c = self.row, self.col
+        if in_board(r+1, c+1) and board[r+1][c+1] != None:
+            self.movable.append((r+1, c+1))
+        elif in_board(r+1, c-1) and board[r+1][c-1] != None:
+            self.movable.append((r+1, c-1))
+        if in_board(r+1, c) and board[r+1][c] == None:
+            self.movable.append((r+1, c))
+        return self.movable
+
 class Rook(Piece):
     def __init__(self, color:Color, row, col):
         super().__init__(color, "♖", row, col)
+
+    def movable_loc(self, board):
+        r, c = self.row, self.col
+        while in_board(r+1, c) and (board[r+1][c] == None):
+            self.movable.append((r+1, c))
+            r += 1
+        if in_board(r+1, c) and (board[r+1][c] != None and board[r+1][c].get_color() != self.color.get_color()): self.movable.append((r+1, c)) # 상대말 잡는경우
+
+        r, c = self.row, self.col
+        while in_board(r-1, c) and (board[r-1][c] == None):
+            self.movable.append((r-1, c))
+            r -= 1
+        if in_board(r-1, c) and (board[r-1][c] != None and board[r-1][c].get_color() != self.color.get_color()): self.movable.append((r-1, c))
+       
+        r, c = self.row, self.col
+        while in_board(r, c+1) and (board[r][c+1] == None):
+            self.movable.append((r, c+1))
+            c += 1
+        if in_board(r, c+1) and (board[r][c+1] != None and board[r][c+1].get_color() != self.color.get_color()): self.movable.append((r, c+1))
+        
+        r, c = self.row, self.col
+        while in_board(r, c-1) and (board[r][c-1] == None):
+            self.movable.append((r, c-1))
+            c -= 1
+        if in_board(r, c-1) and (board[r][c-1] != None and board[r][c-1].get_color() != self.color.get_color()): self.movable.append((r, c-1))
+       
+        return self.movable
+        
 
 class Knight(Piece):
     def __init__(self, color:Color, row, col):
         super().__init__(color, "♘", row, col)
 
+    def movable_loc(self, board):
+        r, c = self.row, self.col
+        if in_board(r+2, c+1) and (board[r+2][c+1] == None or board[r+2][c+1].get_color() != self.color.get_color()):
+            self.movable.append((r+2, c+1))
+        
+        if in_board(r+2, c-1) and (board[r+2][c-1] == None or board[r+2][c-1].get_color() != self.color.get_color()):
+            self.movable.append((r+2, c-1))
+
+        if in_board(r+1, c+2) and (board[r+1][c+2] == None or board[r+1][c+2].get_color() != self.color.get_color()):
+            self.movable.append((r+1, c+2))
+
+        if in_board(r+1, c-2) and (board[r+1][c-2] == None or board[r+1][c-2].get_color() != self.color.get_color()):
+            self.movable.append((r+1, c-2))
+
+        if in_board(r-1, c+2) and (board[r-1][c+2] == None or board[r-1][c+2].get_color() != self.color.get_color()):
+            self.movable.append((r-1, c+2))
+
+        if in_board(r-1, c-2) and (board[r-1][c-2] == None or board[r-1][c-2].get_color() != self.color.get_color()):
+            self.movable.append((r-1, c-2))
+
+        if in_board(r-2, c+1) and (board[r-2][c+1] == None or board[r-2][c+1].get_color() != self.color.get_color()):
+            self.movable.append((r-2, c+1))
+
+        if in_board(r-2, c-1) and (board[r-2][c-1] == None or board[r-2][c-1].get_color() != self.color.get_color()):
+            self.movable.append((r-2, c-1))
+
+        return self.movable
+
 class Bishop(Piece):
     def __init__(self, color:Color, row, col):
         super().__init__(color, "♗", row, col)
+
+    def movable_loc(self, board):
+        r, c = self.row, self.col
+        while in_board(r+1, c+1) and board[r+1][c+1] == None:
+            self.movable.append((r+1, c+1))
+            r, c = r+1, c+1
+        if in_board(r+1, c+1) and (board[r+1][c+1] != None and board[r+1][c+1].get_color != self.color.get_color()): self.movable.append((r+1, c+1))
+
+        r, c = self.row, self.col
+        while in_board(r-1, c-1) and board[r-1][c-1] == None:
+            self.movable.append((r-1, c-1))
+            r, c = r-1, c-1
+        if in_board(r-1, c-1) and (board[r-1][c-1] != None and board[r-1][c-1].get_color != self.color.get_color()): self.movable.append((r-1, c-1))
+
+        r, c = self.row, self.col
+        while in_board(r-1, c+1) and board[r-1][c+1] == None:
+            self.movable.append((r-1, c+1))
+            r, c = r-1, c+1
+        if in_board(r-1, c+1) and (board[r-1][c+1] != None and board[r-1][c+1].get_color != self.color.get_color()): self.movable.append((r-1, c+1))
+
+        while in_board(r+1, c-1) and board[r+1][c-1] == None:
+            self.movable.append((r+1, c-1))
+            r, c = r+1, c-1
+        if in_board(r+1, c-1) and (board[r+1][c-1] != None and board[r+1][c-1].get_color != self.color.get_color()): self.movable.append((r+1, c-1))
+        
+        return self.movable
 
 class Queen(Piece):
     def __init__(self, color:Color, row, col):
         super().__init__(color, "♕", row, col)
 
+    def movable_loc(self, board):
+        r, c = self.row, self.col
+        while in_board(r+1, c) and (board[r+1][c] == None):
+            self.movable.append((r+1, c))
+            r += 1
+        if in_board(r+1, c) and (board[r+1][c] != None and board[r+1][c].get_color() != self.color.get_color()): self.movable.append((r+1, c)) # 상대말 잡는경우
+
+        r, c = self.row, self.col
+        while in_board(r-1, c) and (board[r-1][c] == None):
+            self.movable.append((r-1, c))
+            r -= 1
+        if in_board(r-1, c) and (board[r-1][c] != None and board[r-1][c].get_color() != self.color.get_color()): self.movable.append((r-1, c))
+       
+        r, c = self.row, self.col
+        while in_board(r, c+1) and (board[r][c+1] == None):
+            self.movable.append((r, c+1))
+            c += 1
+        if in_board(r, c+1) and (board[r][c+1] != None and board[r][c+1].get_color() != self.color.get_color()): self.movable.append((r, c+1))
+        
+        r, c = self.row, self.col
+        while in_board(r, c-1) and (board[r][c-1] == None):
+            self.movable.append((r, c-1))
+            c -= 1
+        if in_board(r, c-1) and (board[r][c-1] != None and board[r][c-1].get_color() != self.color.get_color()): self.movable.append((r, c-1))
+
+        r, c = self.row, self.col
+        while in_board(r+1, c+1) and board[r+1][c+1] == None:
+            self.movable.append((r+1, c+1))
+            r, c = r+1, c+1
+        if in_board(r+1, c+1) and (board[r+1][c+1] != None and board[r+1][c+1].get_color != self.color.get_color()): self.movable.append((r+1, c+1))
+
+        r, c = self.row, self.col
+        while in_board(r-1, c-1) and board[r-1][c-1] == None:
+            self.movable.append((r-1, c-1))
+            r, c = r-1, c-1
+        if in_board(r-1, c-1) and (board[r-1][c-1] != None and board[r-1][c-1].get_color != self.color.get_color()): self.movable.append((r-1, c-1))
+
+        r, c = self.row, self.col
+        while in_board(r-1, c+1) and board[r-1][c+1] == None:
+            self.movable.append((r-1, c+1))
+            r, c = r-1, c+1
+        if in_board(r-1, c+1) and (board[r-1][c+1] != None and board[r-1][c+1].get_color != self.color.get_color()): self.movable.append((r-1, c+1))
+
+        while in_board(r+1, c-1) and board[r+1][c-1] == None:
+            self.movable.append((r+1, c-1))
+            r, c = r+1, c-1
+        if in_board(r+1, c-1) and (board[r+1][c-1] != None and board[r+1][c-1].get_color != self.color.get_color()): self.movable.append((r+1, c-1))
+        
+        return self.movable
+
 class King(Piece):
     def __init__(self, color:Color, row, col):
         super().__init__(color, "♔", row, col)
+
+    def movable_loc(self, board):
+        r, c = self.row, self.col
+
+        if in_board(r+1, c) and (board[r+1][c] == None or board[r+1][c].get_color() != self.color.get_color()):
+            self.movable.append((r+1, c))
+        
+        if in_board(r+1, c+1) and (board[r+1][c+1] == None or board[r+1][c+1].get_color() != self.color.get_color()):
+            self.movable.append((r+1, c+1))
+
+        if in_board(r+1, c-1) and (board[r+1][c-1] == None or board[r+1][c-1].get_color() != self.color.get_color()):
+            self.movable.append((r+1, c-1))
+
+        if in_board(r, c+1) and (board[r][c+1] == None or board[r][c+1].get_color() != self.color.get_color()):
+            self.movable.append((r, c+1))
+
+        if in_board(r, c-1) and (board[r][c-1] == None or board[r][c-1].get_color() != self.color.get_color()):
+            self.movable.append((r, c-1))
+
+        if in_board(r-1, c) and (board[r-1][c] == None or board[r-1][c].get_color() != self.color.get_color()):
+            self.movable.append((r-1, c))
+
+        if in_board(r-1, c+1) and (board[r-1][c+1] == None or board[r-1][c+1].get_color() != self.color.get_color()):
+            self.movable.append((r-1, c+1))
+
+        if in_board(r-1, c-1) and (board[r-1][c-1] == None or board[r-1][c-1].get_color() != self.color.get_color()):
+            self.movable.append((r-1, c-1))
+
+        return self.movable
 
 class ChessGame:
     def __init__(self, master):
@@ -60,6 +252,7 @@ class ChessGame:
         self.pieces = []  # 말 객체를 저장할 리스트
         self.create_pieces()  # 말 객체 생성 및 리스트에 추가
         self.create_board()  # 보드 생성
+        self.selected_piece = None  # 선택된 말
 
         self.canvas = tk.Canvas(master, width=400, height=400)
         self.canvas.pack()
