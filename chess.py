@@ -40,6 +40,10 @@ class Piece:
         """return location (row, col)"""
         return (self.row, self.col)
     
+    def change_loc(self, r, c):
+        self.row = r
+        self.col = c
+    
     def movable_loc(self):
         """return movable location list"""
         pass
@@ -269,7 +273,11 @@ class ChessGame:
         self.canvas = tk.Canvas(master, width=400, height=400)
         self.canvas.pack()
         self.draw_board()
+        ### test
         # print(self.board[6][3].movable_loc(self.board))
+        # self.move_piece(1, 0, 2, 0)
+        # self.draw_board()
+        # print(self.board[2][0].get_loc())
 
     def create_pieces(self):
         # set pieces
@@ -307,6 +315,12 @@ class ChessGame:
                 piece = self.board[row][col]
                 if piece is not None:
                     self.canvas.create_text(x0 + 25, y0 + 25, text=piece.get_symbol(), font=("Arial", 24), fill=piece.color.get_color(), tags="piece")
+
+    def move_piece(self, r, c, nr, nc): # move piece on (r, c) to (nr, nc)
+        piece = self.board[r][c]
+        self.board[nr][nc] = piece
+        piece.change_loc(nr, nc)
+        self.board[r][c] = None
 
 root = tk.Tk()
 game = ChessGame(root)
