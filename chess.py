@@ -273,7 +273,7 @@ class ChessGame:
 
     def create_pieces(self):
         # set pieces
-        for row in [0, -1]:
+        for row in [0, 7]:
             for col, piece_class in enumerate([Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]):
                 if row == 0:
                     self.pieces.append(piece_class(Black(), row, col))
