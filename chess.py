@@ -65,6 +65,9 @@ class Piece:
     def get_color(self):
         return self.color.get_color()
     
+    def set_color(self, color):
+        self.color = color
+    
     def get_loc(self):
         """return location (row, col)"""
         return (self.row, self.col)
@@ -340,14 +343,14 @@ class ChessGame:
     def create_pieces(self):
         # Prototype here
         # set black pawn
-        bp = Pawn(PawnBlack(), None, None, self) # Prototype
+        pawn_prototype = Pawn(PawnBlack(), None, None, self) # Prototype
         for col in range(8):
-            self.pieces.append(bp.clone(1, col))
+            self.pieces.append(pawn_prototype.clone(1, col))
         
         # set white pawn
-        wp = Pawn(PawnWhite(), None, None, self) # Prototype
+        pawn_prototype.set_color(PawnWhite())
         for col in range(8):
-            self.pieces.append(wp.clone(6, col))
+            self.pieces.append(pawn_prototype.clone(6, col))
 
         # set pieces
         for row in [0, 7]:
