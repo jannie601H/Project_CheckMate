@@ -7,6 +7,7 @@
 
 import tkinter as tk
 from abc import ABC, abstractmethod
+import copy
 
 # set color using bridge pattern
 # color API
@@ -15,6 +16,7 @@ class Color(ABC):
     def get_color(self):
         pass
 
+# Bridge pattern - Black/White
 class Black(Color):
     def __init__(self):
         self.color = "black"
@@ -29,7 +31,7 @@ class White(Color):
     def get_color(self):
         return self.color
 
-
+# Strategy pattern - PawnBlack/PawnWhite
 class PawnBlack(Black):
     def move_dir(self):
         return 1
@@ -113,6 +115,10 @@ class Piece:
         self.click = False
         self.canvas.itemconfig(self.tag + "out", outline='')
 
+    # clone method for Prototype pattern
+    def clone(self, r, c):
+        pass
+
 # chess piece emojis R': '♜', 'N': '♞', 'B': '♝', 'Q': '♛', 'K': '♚', 'P': '♟'
 
 def in_board(r, c): # check r, c in board
@@ -131,6 +137,7 @@ class Pawn(Piece):
         super().__init__(color, "♙", row, col, game)
         self.first_move = True # pawn can move 2 step forward in first move
 
+    # Strategy pattern application
     def get_dir(self):
         return self.color.move_dir()
         
@@ -142,7 +149,7 @@ class Pawn(Piece):
         elif self.get_color() == 'white':
             en_color = 'black'
             
-        if not check_board(self.row+move_dir, self.col, self.board):
+        if in_board(self.row+move_dir, self.col) and not check_board(self.row+move_dir, self.col, self.board):
             movable.append((self.row + move_dir, self.col))
 
             if self.first_move and not check_board(self.row + 2*move_dir, self.col, self.board):
@@ -159,6 +166,19 @@ class Pawn(Piece):
         if self.first_move:
             self.first_move = False
         super().move_piece(x0, y0)
+    
+    def clone(self, r, c):
+        # Create a shallow copy of the piece
+        cloned_piece = copy.copy(self)
+        # Manually reset mutable attributes that shouldn't be shared
+        cloned_piece.change_loc(r, c)
+        cloned_piece.tag = "p" + str(Piece.numbering)
+        Piece.numbering += 1
+        # Reassign the game-specific attributes
+        cloned_piece.canvas = self.game.canvas
+        cloned_piece.board = self.game.board
+        cloned_piece.game = self.game
+        return cloned_piece
 
 
 class Rook(Piece):
@@ -182,7 +202,6 @@ class Rook(Piece):
                 r += r_dir[i]
                 c += c_dir[i]
         return movable
-        
         
 
 class Knight(Piece):
@@ -217,6 +236,7 @@ class Knight(Piece):
             movable.append((r-2, c-1))
 
         return movable
+    
 
 class Bishop(Piece):
     def __init__(self, color:Color, row, col, game):
@@ -239,6 +259,7 @@ class Bishop(Piece):
                 r += r_dir[i]
                 c += c_dir[i]
         return movable
+    
 
 
 class Queen(Piece):
@@ -262,6 +283,7 @@ class Queen(Piece):
                 r += r_dir[i]
                 c += c_dir[i]
         return movable
+    
 
 class King(Piece):
     def __init__(self, color:Color, row, col, game):
@@ -296,6 +318,7 @@ class King(Piece):
             movable.append((r-1, c-1))
 
         return movable
+    
 
 class ChessGame:
     def __init__(self, master):
@@ -313,13 +336,19 @@ class ChessGame:
         self.create_board()  # 보드 생성
 
         self.draw_board()
-        ### test
-        # print(self.board[6][3].movable_loc(self.board))
-        # self.move_piece(1, 0, 2, 0)
-        # self.draw_board()
-        # print(self.board[2][0].get_loc())
 
     def create_pieces(self):
+        # Prototype here
+        # set black pawn
+        bp = Pawn(PawnBlack(), None, None, self) # Prototype
+        for col in range(8):
+            self.pieces.append(bp.clone(1, col))
+        
+        # set white pawn
+        wp = Pawn(PawnWhite(), None, None, self) # Prototype
+        for col in range(8):
+            self.pieces.append(wp.clone(6, col))
+
         # set pieces
         for row in [0, 7]:
             for col, piece_class in enumerate([Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]):
@@ -329,12 +358,12 @@ class ChessGame:
                     self.pieces.append(piece_class(White(), row, col, self))
 
         # set pawns
-        for row in [1, 6]:
-            for col, piece_class in enumerate([Pawn]*8):
-                if row == 1:
-                    self.pieces.append(piece_class(PawnBlack(), row, col, self))
-                else:
-                    self.pieces.append(piece_class(PawnWhite(), row, col, self))
+        # for row in [1, 6]:
+        #     for col, piece_class in enumerate([Pawn]*8):
+        #         if row == 1:
+        #             self.pieces.append(piece_class(PawnBlack(), row, col, self))
+        #         else:
+        #             self.pieces.append(piece_class(PawnWhite(), row, col, self))
 
     def create_board(self):
         for piece in self.pieces:
@@ -355,7 +384,7 @@ class ChessGame:
                     piece.draw_piece(x0, y0)
                     piece.bind_key()
 
-    def move_piece(self, event): # move piece on (r, c) to (nr, nc)
+    def move_piece(self, event):
         dest = event.widget.find_withtag('current')[0]
         x, y = self.canvas.coords(dest)[0:2]
         self.canvas.delete('moveables')
