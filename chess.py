@@ -1,13 +1,9 @@
-#추가 필요
-#폰 끝에 도달 시 변환 - 수정중
-#게임 종료(맨 밑에 추가할 부분 #=====로 표시해 놓음) - 끝날때 재시작 기능 추가?
-
-
 #현재 사용 패턴 - strategy, bridge, composite, prototype
 
 from copy import deepcopy
 import tkinter as tk
 from abc import ABC, abstractmethod
+from time import sleep
 
 # set color using bridge pattern  
 #Piece - Color bridge pattern으로 이음
@@ -201,10 +197,14 @@ class Pawn(Piece):
     def change_piece(self, available):
         buttons = []
         num = 0
-        self.canvas.create_rectangle(40, 162, 360, 238, fill='light grey', tags='button')
+        if self.get_color() == 'black':
+            bgcolor = 'light grey'
+        elif self.get_color() == 'white':
+            bgcolor = 'black'
+        self.canvas.create_rectangle(32, 162, 368, 238, fill='light grey', tags='button')
         for P_type in available:
-            buttons.append(tk.Button(self.game.master, overrelief='solid', width=56, height=56, command=lambda: self.change(P_type, buttons)))
-            buttons[-1].place(x=50+66*num, y=172)
+            buttons.append(tk.Button(self.game.master, bg=bgcolor, text=P_type.symbol, fg=self.get_color(), overrelief='solid', font=('Arial, 28'), width=3, height=1, command=lambda x=P_type: self.change(x, buttons)))
+            buttons[-1].place(x=42+80*num, y=168)
             num += 1
 
     def change(self, piece:Piece, buttonlist):
@@ -214,8 +214,8 @@ class Pawn(Piece):
             i.destroy()
         piece.clone(self.row, self.col, self.game)
         x0, y0 = self.col * square_size, self.row * square_size
-        piece.draw_piece(x0, y0)
-        piece.bind_key()
+        self.board[self.row][self.col].draw_piece(x0, y0)
+        self.board[self.row][self.col].bind_key()
         self.deletion()
 
 
@@ -499,10 +499,8 @@ class ChessGame:
             dest_loc.deletion()
         self.current_piece.move_piece(x - 0.3*self.square_size, y-0.3*self.square_size)
         self.current_piece.change_loc(r, c)
-        '''
         if isinstance(self.current_piece, Pawn) and (self.current_piece.row == 0 or self.current_piece.row == 7):
             self.current_piece.change_piece(self.pieces.getComposite(self.current_piece.get_color()))
-        '''
         Piece.switch = not Piece.switch
         
 
@@ -514,18 +512,11 @@ class ChessGame:
         
     def set_current(self, piece):
         self.current_piece = piece
-#================================================================================================
-#================================================================================================
-#================================================================================================
-#================================================================================================
-#================================================================================================
+
     def end_game(self, win):
-        print(win)
-#================================================================================================
-#================================================================================================
-#================================================================================================
-#================================================================================================
-#================================================================================================
+        forEnd = tk.Label(self.master, text=win[0].upper()+win[1:] +' is win!', font=('Arial', 32), width=14, fg='yellow', bg='black')
+        forEnd.place(x=22, y=168)
+
 
 root = tk.Tk()
 game = ChessGame(root)
